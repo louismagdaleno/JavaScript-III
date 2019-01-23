@@ -45,3 +45,4 @@ console.log(louis.name);
 
 // code example for Explicit Binding
 
+Humanoid.call(this, object);
