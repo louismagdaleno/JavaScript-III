@@ -14,6 +14,14 @@
   * dimensions (These represent the character's size in the video game)
   * destroy() // prototype method -> returns the string: 'Object was removed from the game.'
 */
+function GameObject (object) {
+  this.createdAt = object.createdAt,
+  this.dimensions = object.dimensions
+}
+
+GameObject.prototype.destroy = function () {
+  return `${this.name} was removed from the game.`;
+};
 
 /*
   === CharacterStats ===
@@ -22,6 +30,15 @@
   * takeDamage() // prototype method -> returns the string '<object name> took damage.'
   * should inherit destroy() from GameObject's prototype
 */
+function CharacterStats (object) {
+  this.healthPoints = object.healthPoints,
+  this.name = object.name
+  GameObject.call(this, object);
+}
+CharacterStats.prototype = Object.create(GameObject.prototype);
+CharacterStats.prototype.takeDamage = function() {
+  return `${this.name} took damage.`;
+}
 
 /*
   === Humanoid (Having an appearance or character resembling that of a human.) ===
@@ -32,6 +49,19 @@
   * should inherit destroy() from GameObject through CharacterStats
   * should inherit takeDamage() from CharacterStats
 */
+function Humanoid ( object ) {
+  this.team = object.team,
+  this.weapons = object.weapons,
+  this.language = object.language,
+  GameObject.call(this, object);
+  CharacterStats.call(this, object);
+}
+
+Humanoid.prototype = Object.create(CharacterStats.prototype);
+
+Humanoid.prototype.greet = function () {
+  return (`${this.name} offers a greeting in ${this.language}.`);
+}
  
 /*
   * Inheritance chain: GameObject -> CharacterStats -> Humanoid
@@ -41,7 +71,7 @@
 
 // Test you work by un-commenting these 3 objects and the list of console logs below:
 
-/*
+
   const mage = new Humanoid({
     createdAt: new Date(),
     dimensions: {
@@ -102,9 +132,83 @@
   console.log(archer.greet()); // Lilith offers a greeting in Elvish.
   console.log(mage.takeDamage()); // Bruce took damage.
   console.log(swordsman.destroy()); // Sir Mustachio was removed from the game.
-*/
+
 
   // Stretch task: 
   // * Create Villain and Hero constructor functions that inherit from the Humanoid constructor function.  
   // * Give the Hero and Villains different methods that could be used to remove health points from objects which could result in destruction if health gets to 0 or drops below 0;
   // * Create two new objects, one a villain and one a hero and fight it out with methods!
+
+  // Create hero constructor function
+  function Hero (object) {
+    //inherit from humanoid
+    Humanoid.call(this, object);
+    this.attackPower = object.attackPower
+  }
+
+  // inherit prototype from humanoid
+  Hero.prototype = Object.create(Humanoid.prototype);
+
+  // create prototype attack function
+  Hero.prototype.attack = function (enemy) {
+    console.log(`${this.name} attacks ${enemy.name} for ${this.attackPower}!`)
+    enemy.healthPoints -= this.attackPower;
+
+    // if enemy is dead, then destroy 
+    if (enemy.healthPoints <= 0) {
+      console.log(enemy.destroy());
+    }
+    // otherwise display remaining hp
+    else {
+      console.log(`${enemy.name} has ${enemy.healthPoints} remaining.`);
+    }
+  }
+
+  // create villain constructor function
+  function Villain (object) {
+    // inherit from hero
+    Hero.call(this, object);
+  }
+
+  // inherit prototype from Hero
+  Villain.prototype = Object.create(Hero.prototype);
+
+  // Create Mario Hero
+  const Mario = new Hero({
+    createdAt: new Date(),
+    dimensions: {
+      length: 2,
+      width: 2,
+      height: 2,
+    },
+    healthPoints: 15,
+    name: 'Super Mario',
+    team: 'Nintendo',
+    weapons: [
+      'White Gloves'
+    ],
+    attackPower: 20,
+    language: 'Italian',
+  });
+
+  // Create Bowser Villain
+  const Bowser = new Villain({
+    createdAt: new Date(),
+    dimensions: {
+      length: 2,
+      width: 2,
+      height: 2,
+    },
+    healthPoints: 20,
+    name: 'BOWSER',
+    team: 'Nintendo',
+    attackPower: 10,
+    weapons: [
+      'Flames',
+      'Spikes'
+    ],
+    language: 'Lizard',
+  });
+
+  // Mario saves the day
+  console.log(Mario.attack(Bowser, 20));
